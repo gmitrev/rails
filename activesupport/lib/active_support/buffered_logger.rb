@@ -99,6 +99,11 @@ module ActiveSupport
     def flush
       @guard.synchronize do
         buffer.each do |content|
+          begin
+            detection = CharlockHolmes::EncodingDetector.detect(content)
+            content = CharlockHolmes::Converter.convert(content, detection[:encoding], 'UTF-8')
+          rescue
+          end
           @log.write(content)
         end
 
@@ -107,6 +112,7 @@ module ActiveSupport
         clear_buffer
       end
     end
+
 
     def close
       flush
